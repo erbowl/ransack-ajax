@@ -1,0 +1,63 @@
+%h1 Listing users
+
+=search_form_for @q,remote: true,:id=>"user_form" do |f|
+  名前
+  =f.text_field :name_cont
+  男性
+  =f.radio_button :sex_in_any,"Male"
+  女性
+  =f.radio_button :sex_in_any,"Female"
+  email
+  =f.text_field :email_cont
+  ○歳以上
+  =f.number_field :age_gt
+  =f.submit
+
+:coffee
+  $ ->
+    -# テキストフィールの変更を察知してsubmit
+    $("#user_form").keyup ->
+      $("#user_form").find("input[type='submit']").click()
+    -# フォームのinputタグの変更をsubmit
+    $("#user_form").change ->
+      $("#user_form").find("input[type='submit']").click()
+    -# ajaxの結果を受け取って実行する
+    $('#user_form').on 'ajax:success', (event, results) ->
+      $select=$("#user_check")
+      $trs=$select.find("tr")
+      $trs.each ->
+        # idを読み取りInt型に変換する
+        value=parseInt($(this).find("td").first().text())
+        -# idが結果に含まれていたら表示する
+        if value in results
+          $(this).show()
+        else
+          $(this).hide()
+
+%table
+  %thead
+    %tr
+      %th id
+      %th Name
+      %th Email
+      %th Description
+      %th Age
+      %th sex
+      %th
+      %th
+      %th
+
+  %tbody#user_check
+    - @users.each do |user|
+      %tr
+        %td= user.id
+        %td= user.name
+        %td= user.email
+        %td= user.description
+        %td= user.age
+        %td= user.sex
+        %td= link_to 'Show', user
+        %td= link_to 'Edit', edit_user_path(user)
+        %td= link_to 'Destroy', user, method: :delete, data: { confirm: 'Are you sure?' }
+
+%br
